@@ -6,4 +6,6 @@ public interface IAuthService
 {
     Task<bool> RegisterAsync(RegisterRequest request);
     Task<string?> LoginAsync(LoginRequest request);
+    Task<int?> UpdateUserStatusAsync(int userId, int modifiedBy, bool isActive);
+
 }

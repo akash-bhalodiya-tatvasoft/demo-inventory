@@ -4,6 +4,7 @@ using Inventory.Models.Auth;
 using Inventory.Models.Entities;
 using Inventory.Services.Auth;
 using Inventory.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Inventory.Common.Enums.GlobalEnum;
 
@@ -71,5 +72,47 @@ public class AuthController : ControllerBase
         });
 
         return StatusCode(StatusCodes.Status200OK, ApiResponse<string>.SuccessResponse(token, StatusCodes.Status200OK));
+    }
+
+    [HttpPost("update-status")]
+    [Authorize(Roles = $"{nameof(UserRole.SuperAdmin)}")]
+    public async Task<IActionResult> UpdateStatus([FromQuery] int userId, [FromQuery] bool status)
+    {
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = Request.Headers["User-Agent"].ToString();
+
+        if (userId == null || userId <= 0 || status == null)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Invalid query params.", ModelStateHelper.ToErrorResponse(ModelState)));
+        }
+
+        var user = await _userService.GetUserByIdAsync(userId);
+
+        if (user == null)
+        {
+            return StatusCode(StatusCodes.Status404NotFound, ApiResponse<string>.Failure(StatusCodes.Status404NotFound, "User not found.", ModelStateHelper.ToErrorResponse(ModelState)));
+        }
+
+        var email = HttpContext.User.GetUserEmail();
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token.", ModelStateHelper.ToErrorResponse(ModelState)));
+        }
+        var loggedInUser = await _userService.GetUserByEmailAsync(email);
+
+        var id = await _authService.UpdateUserStatusAsync(userId, loggedInUser.Id, status);
+
+        await _userActivityService.LogAsync(new UserActivityLog
+        {
+            UserId = user?.Id ?? 0,
+            ActivityType = "Status Update",
+            ActivityDescription = $"User status updated to {(status ? "Active" : "Inactive")}.",
+            IpAddress = ipAddress,
+            UserAgent = userAgent,
+            ActivityModule = (int)ActivityLogModule.User,
+            CreatedBy = loggedInUser.Id
+        });
+
+        return StatusCode(StatusCodes.Status200OK, ApiResponse<int?>.SuccessResponse(id, StatusCodes.Status200OK));
     }
 }

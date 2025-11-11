@@ -65,7 +65,7 @@ public class UserProfileController : ControllerBase
         var email = HttpContext.User.GetUserEmail();
         if (string.IsNullOrWhiteSpace(email))
         {
-            return StatusCode(StatusCodes.Status400BadRequest, ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Invalid request body.", ModelStateHelper.ToErrorResponse(ModelState)));
+            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token.", ModelStateHelper.ToErrorResponse(ModelState)));
         }
         var user = await _userService.GetUserByEmailAsync(email);
 
@@ -98,7 +98,7 @@ public class UserProfileController : ControllerBase
         var email = HttpContext.User.GetUserEmail();
         if (string.IsNullOrWhiteSpace(email))
         {
-            return StatusCode(StatusCodes.Status400BadRequest, ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Invalid request body.", ModelStateHelper.ToErrorResponse(ModelState)));
+            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token.", ModelStateHelper.ToErrorResponse(ModelState)));
         }
         var user = await _userService.GetUserByEmailAsync(email);
 

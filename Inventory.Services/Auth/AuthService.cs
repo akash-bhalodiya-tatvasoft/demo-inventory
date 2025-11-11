@@ -61,6 +61,17 @@ public class AuthService : IAuthService
         return GenerateJwtToken(user);
     }
 
+    public async Task<int?> UpdateUserStatusAsync(int userId, int modifiedBy, bool isActive)
+    {
+        var result = await _context.Database
+        .SqlQueryRaw<int>(
+            @"SELECT public.fn_make_user_inactive({0}, {1}, {2});",
+            userId, modifiedBy, isActive)
+        .ToListAsync();
+
+        return result.FirstOrDefault();
+    }
+
     private string GenerateJwtToken(User user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();

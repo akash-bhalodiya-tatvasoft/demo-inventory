@@ -31,6 +31,13 @@ public class UserProfileService : IUserProfileService
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
+    public async Task<UserProfile?> GetByUserIdAsync(int userId)
+    {
+        return await _context.UserProfiles
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.UserId == userId);
+    }
+
     public async Task<int?> CreateAsync(UserProfileRequest request, int? userId)
     {
 

@@ -10,4 +10,6 @@ public interface IUserProfileService
     Task<int?> CreateAsync(UserProfileRequest request, int? userId);
     Task<bool> UpdateAsync(int id, UserProfileRequest request, int? userId);
     Task<bool> DeleteAsync(int id);
+    Task<UserProfile?> GetByUserIdAsync(int userId);
+
 }
