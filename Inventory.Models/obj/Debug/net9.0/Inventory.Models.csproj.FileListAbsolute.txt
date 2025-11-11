@@ -1,0 +1,11 @@
+D:\Demo-3\Inventory.Models\bin\Debug\net9.0\Inventory.Models.deps.json
+d:\Demo-3\Inventory.Models\bin\Debug\net9.0\Inventory.Models.dll
+d:\Demo-3\Inventory.Models\bin\Debug\net9.0\Inventory.Models.pdb
+d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.GeneratedMSBuildEditorConfig.editorconfig
+d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.AssemblyInfoInputs.cache
+d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.AssemblyInfo.cs
+d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.csproj.CoreCompileInputs.cache
+d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.dll
+d:\Demo-3\Inventory.Models\obj\Debug\net9.0\refint\Inventory.Models.dll
+d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.pdb
+D:\Demo-3\Inventory.Models\obj\Debug\net9.0\ref\Inventory.Models.dll
