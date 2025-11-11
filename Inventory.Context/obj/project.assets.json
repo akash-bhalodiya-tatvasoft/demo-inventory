@@ -748,8 +748,8 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj": {
-              "projectPath": "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj"
+            "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj": {
+              "projectPath": "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj"
             },
             "d:\\Demo-3\\Inventory.Models\\Inventory.Models.csproj": {
               "projectPath": "d:\\Demo-3\\Inventory.Models\\Inventory.Models.csproj"

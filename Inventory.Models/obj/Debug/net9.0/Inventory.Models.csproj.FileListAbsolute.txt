@@ -9,3 +9,4 @@ d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.dll
 d:\Demo-3\Inventory.Models\obj\Debug\net9.0\refint\Inventory.Models.dll
 d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.pdb
 D:\Demo-3\Inventory.Models\obj\Debug\net9.0\ref\Inventory.Models.dll
+d:\Demo-3\Inventory.Models\obj\Debug\net9.0\Inventory.Models.sourcelink.json

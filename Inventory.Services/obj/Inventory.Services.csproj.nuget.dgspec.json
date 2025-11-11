@@ -4,14 +4,14 @@
     "d:\\Demo-3\\Inventory.Services\\Inventory.Services.csproj": {}
   },
   "projects": {
-    "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj": {
+    "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj",
+        "projectUniqueName": "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj",
         "projectName": "Inventory.Common",
-        "projectPath": "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj",
+        "projectPath": "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj",
         "packagesPath": "C:\\Users\\pce35\\.nuget\\packages\\",
-        "outputPath": "D:\\Demo-3\\Inventory.Common\\obj\\",
+        "outputPath": "d:\\Demo-3\\Inventory.Common\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\pce35\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -92,8 +92,8 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj": {
-                "projectPath": "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj"
+              "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj": {
+                "projectPath": "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj"
               },
               "d:\\Demo-3\\Inventory.Models\\Inventory.Models.csproj": {
                 "projectPath": "d:\\Demo-3\\Inventory.Models\\Inventory.Models.csproj"
@@ -227,8 +227,8 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj": {
-                "projectPath": "D:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj"
+              "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj": {
+                "projectPath": "d:\\Demo-3\\Inventory.Common\\Inventory.Common.csproj"
               },
               "d:\\Demo-3\\Inventory.Context\\Inventory.Context.csproj": {
                 "projectPath": "d:\\Demo-3\\Inventory.Context\\Inventory.Context.csproj"

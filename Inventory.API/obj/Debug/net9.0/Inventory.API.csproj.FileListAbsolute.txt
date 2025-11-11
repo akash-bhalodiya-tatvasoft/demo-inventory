@@ -66,3 +66,4 @@ d:\Demo-3\Inventory.API\bin\Debug\net9.0\NLog.Extensions.Logging.dll
 d:\Demo-3\Inventory.API\bin\Debug\net9.0\NLog.Web.AspNetCore.dll
 d:\Demo-3\Inventory.API\bin\Debug\net9.0\NLog.config
 d:\Demo-3\Inventory.API\bin\Debug\net9.0\NLog.Database.dll
+d:\Demo-3\Inventory.API\obj\Debug\net9.0\Inventory.API.sourcelink.json

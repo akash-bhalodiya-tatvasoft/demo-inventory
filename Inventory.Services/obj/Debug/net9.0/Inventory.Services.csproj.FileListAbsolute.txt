@@ -17,3 +17,4 @@ d:\Demo-3\Inventory.Services\obj\Debug\net9.0\Inventory.Services.dll
 d:\Demo-3\Inventory.Services\obj\Debug\net9.0\refint\Inventory.Services.dll
 d:\Demo-3\Inventory.Services\obj\Debug\net9.0\Inventory.Services.pdb
 d:\Demo-3\Inventory.Services\obj\Debug\net9.0\ref\Inventory.Services.dll
+d:\Demo-3\Inventory.Services\obj\Debug\net9.0\Inventory.Services.sourcelink.json

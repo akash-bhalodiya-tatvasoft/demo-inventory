@@ -15,3 +15,4 @@ d:\Demo-3\Inventory.Context\obj\Debug\net9.0\Inventory.Context.dll
 d:\Demo-3\Inventory.Context\obj\Debug\net9.0\refint\Inventory.Context.dll
 d:\Demo-3\Inventory.Context\obj\Debug\net9.0\Inventory.Context.pdb
 d:\Demo-3\Inventory.Context\obj\Debug\net9.0\ref\Inventory.Context.dll
+d:\Demo-3\Inventory.Context\obj\Debug\net9.0\Inventory.Context.sourcelink.json

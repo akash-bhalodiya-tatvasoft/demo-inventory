@@ -13,3 +13,4 @@ d:\Demo-3\Inventory.Common\obj\Debug\net9.0\Inventory.Common.dll
 d:\Demo-3\Inventory.Common\obj\Debug\net9.0\refint\Inventory.Common.dll
 d:\Demo-3\Inventory.Common\obj\Debug\net9.0\Inventory.Common.pdb
 D:\Demo-3\Inventory.Common\obj\Debug\net9.0\ref\Inventory.Common.dll
+d:\Demo-3\Inventory.Common\obj\Debug\net9.0\Inventory.Common.sourcelink.json
