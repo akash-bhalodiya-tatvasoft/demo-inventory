@@ -17,29 +17,36 @@ public class ProductService : IProductService
         _adoDbContext = adoDbContext;
     }
 
-    public async Task<IEnumerable<Product?>> GetAllAsync()
+    public async Task<IEnumerable<ProductResponse?>> GetAllAsync(string search)
     {
-        const string query = @"SELECT * FROM ""Products""";
+        search = search?.ToLower();
 
-        var product = await _adoDbContext.ExecuteQueryGetList<Product>(query, null);
+        string query = @"SELECT p.*, c.""Name"" as ""CategoryName"" FROM ""Products"" AS p INNER JOIN ""Categories"" AS c ON p.""CategoryId"" = c.""Id"" WHERE LOWER(p.""Name"") LIKE @Search OR LOWER(p.""Description"") LIKE @Search OR LOWER(c.""Name"") LIKE @Search";
+        var parameters = new Dictionary<string, object>
+        {
+            { "Search", $"%{search}%" },
+        };
+
+
+        var product = await _adoDbContext.ExecuteQueryGetList<ProductResponse>(query, parameters);
         return product;
     }
 
-    public async Task<Product?> GetByIdAsync(int id)
+    public async Task<ProductResponse?> GetByIdAsync(int id)
     {
-        const string query = @"SELECT * FROM ""Products"" WHERE ""Id"" = @Id";
+        string query = @"SELECT p.*, c.""Name"" as ""CategoryName"" FROM ""Products"" AS p INNER JOIN ""Categories"" AS c ON p.""CategoryId"" = c.""Id"" WHERE p.""Id"" = @Id";
         var parameters = new Dictionary<string, object>
         {
             { "Id", id },
         };
 
-        var product = await _adoDbContext.ExecuteQueryGetObject<Product>(query, parameters);
+        var product = await _adoDbContext.ExecuteQueryGetObject<ProductResponse>(query, parameters);
         return product;
     }
 
     public async Task<int> CreateAsync(ProductRequest product, int? userId)
     {
-        const string query = @"
+        string query = @"
             INSERT INTO ""Products"" 
                 (""Name"", ""Description"", ""Price"", ""Quantity"", ""DiscountedPrice"", ""DiscountEndOn"", ""CategoryId"", ""CreatedAt"", ""CreatedBy"")
             VALUES 
@@ -73,7 +80,7 @@ public class ProductService : IProductService
             return false;
         }
 
-        const string query = @"
+        string query = @"
             UPDATE ""Products"" SET
                 ""Name"" = @Name,
                 ""Description"" = @Description,
@@ -107,7 +114,7 @@ public class ProductService : IProductService
 
     public async Task<bool> DeleteAsync(int id)
     {
-        const string query = @"DELETE FROM ""Products"" WHERE ""Id"" = @Id RETURNING ""Id""";
+        string query = @"DELETE FROM ""Products"" WHERE ""Id"" = @Id RETURNING ""Id""";
         var parameters = new Dictionary<string, object>
         {
             { "Id", id },
@@ -115,5 +122,18 @@ public class ProductService : IProductService
 
         var result = await _adoDbContext.ExecuteQuery<int>(query, parameters);
         return result > 0;
+    }
+
+    public async Task AddOfferAsync(int productId, ProductOfferRequest productOfferRequest, int? modifiedBy)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            { "p_product_id", productId },
+            { "p_discounted_price", productOfferRequest?.DiscountedPrice },
+            { "p_discount_end_on", productOfferRequest?.DiscountEndOn },
+            { "p_modified_by", modifiedBy }
+        };
+
+        await _adoDbContext.ExecuteProcedure("public.sp_add_product_offer", parameters);
     }
 }

@@ -1,10 +1,10 @@
-namespace Inventory.Models.Entities;
+using Inventory.Models.Entities;
 
-public class UserProfile : BaseEntity
+namespace Inventory.Models.UserProfiles;
+
+public class UserProfileResponse : BaseEntity
 {
     public int Id { get; set; }
-
-    public int UserId { get; set; }
 
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
@@ -15,5 +15,5 @@ public class UserProfile : BaseEntity
 
     public DateTime? Dob { get; set; }
 
-    public User User { get; set; } = null!;
+    public string Email { get; set; } = string.Empty;
 }

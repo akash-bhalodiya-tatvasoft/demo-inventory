@@ -15,9 +15,10 @@ public class CategoryService : ICategoryService
         _context = context;
     }
 
-    public async Task<IEnumerable<Category>> GetAllAsync()
+    public async Task<IEnumerable<Category>> GetAllAsync(string search)
     {
-        return await _context.Categories
+        search = search?.ToLower();
+        return await _context.Categories.Where(c => string.IsNullOrEmpty(search) || (c.Name != null && c.Name.ToLower().Contains(search)) || (c.Description != null && c.Description.ToLower().Contains(search)))
             .AsNoTracking()
             .ToListAsync();
     }

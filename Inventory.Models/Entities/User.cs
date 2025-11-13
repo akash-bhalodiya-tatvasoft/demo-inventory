@@ -17,6 +17,10 @@ public class User : BaseEntity
 
     public bool IsActive { get; set; } = true;
     public string Permissions { get; set; } = JsonSerializer.Serialize(new UserPermissions());
+
+
+    public UserProfile UserProfile { get; set; } = null!;
+
 }
 
 public class UserPermissions

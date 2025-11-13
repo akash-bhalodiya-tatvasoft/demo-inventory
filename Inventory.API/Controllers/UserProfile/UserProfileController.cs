@@ -26,12 +26,12 @@ public class UserProfileController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync([FromQuery] string search)
     {
-        var profiles = await _profileService.GetAllAsync();
+        var profiles = await _profileService.GetAllAsync(search);
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<IEnumerable<UserProfile>>.SuccessResponse(profiles, StatusCodes.Status200OK)
+            ApiResponse<IEnumerable<UserProfileResponse>>.SuccessResponse(profiles, StatusCodes.Status200OK)
         );
     }
 
@@ -43,13 +43,13 @@ public class UserProfileController : ControllerBase
         {
             return StatusCode(
                 StatusCodes.Status404NotFound,
-                ApiResponse<UserProfile>.Failure(StatusCodes.Status404NotFound, "User profile not found.")
+                ApiResponse<UserProfileResponse>.Failure(StatusCodes.Status404NotFound, "User profile not found.")
             );
         }
 
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<UserProfile>.SuccessResponse(profile, StatusCodes.Status200OK)
+            ApiResponse<UserProfileResponse>.SuccessResponse(profile, StatusCodes.Status200OK)
         );
     }
 

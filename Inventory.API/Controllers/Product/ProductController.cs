@@ -26,12 +26,12 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync([FromQuery] string search)
     {
-        var products = await _productService.GetAllAsync();
+        var products = await _productService.GetAllAsync(search);
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<IEnumerable<Product>>.SuccessResponse(products, StatusCodes.Status200OK)
+            ApiResponse<IEnumerable<ProductResponse>>.SuccessResponse(products, StatusCodes.Status200OK)
         );
     }
 
@@ -43,13 +43,13 @@ public class ProductController : ControllerBase
         {
             return StatusCode(
                 StatusCodes.Status404NotFound,
-                ApiResponse<Product>.Failure(StatusCodes.Status404NotFound, "Product not found.")
+                ApiResponse<ProductResponse>.Failure(StatusCodes.Status404NotFound, "Product not found.")
             );
         }
 
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<Product>.SuccessResponse(product, StatusCodes.Status200OK)
+            ApiResponse<ProductResponse>.SuccessResponse(product, StatusCodes.Status200OK)
         );
     }
 
@@ -137,6 +137,39 @@ public class ProductController : ControllerBase
         return StatusCode(
             StatusCodes.Status200OK,
             ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+        );
+    }
+
+    [HttpPut("offer/{productId:int}")]
+    [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Update })]
+    public async Task<IActionResult> AddOfferAsync(int productId, [FromBody] ProductOfferRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return StatusCode(
+                StatusCodes.Status400BadRequest,
+                ApiResponse<string>.Failure(
+                    StatusCodes.Status400BadRequest,
+                    "Invalid request body.",
+                    ModelStateHelper.ToErrorResponse(ModelState)
+                )
+            );
+        }
+
+        var email = HttpContext.User.GetUserEmail();
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return StatusCode(StatusCodes.Status401Unauthorized,
+                ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token."));
+        }
+
+        var user = await _userService.GetUserByEmailAsync(email);
+
+        await _productService.AddOfferAsync(productId, request, user?.Id);
+
+        return StatusCode(
+            StatusCodes.Status200OK,
+            ApiResponse<int>.SuccessResponse(productId, StatusCodes.Status200OK)
         );
     }
 }

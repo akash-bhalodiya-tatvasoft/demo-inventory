@@ -5,9 +5,11 @@ namespace Inventory.Services.Interfaces;
 
 public interface IProductService
 {
-    Task<IEnumerable<Product>> GetAllAsync();
-    Task<Product?> GetByIdAsync(int id);
+    Task<IEnumerable<ProductResponse>> GetAllAsync(string search);
+    Task<ProductResponse?> GetByIdAsync(int id);
     Task<int> CreateAsync(ProductRequest product, int? userId);
     Task<bool> UpdateAsync(int id, ProductRequest product, int? userId);
     Task<bool> DeleteAsync(int id);
+    Task AddOfferAsync(int id, ProductOfferRequest productOfferRequest, int? userId);
+
 }

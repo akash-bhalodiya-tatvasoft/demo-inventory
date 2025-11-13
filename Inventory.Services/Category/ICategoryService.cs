@@ -5,7 +5,7 @@ namespace Inventory.Services.Interfaces;
 
 public interface ICategoryService
 {
-    Task<IEnumerable<Category>> GetAllAsync();
+    Task<IEnumerable<Category>> GetAllAsync(string search);
     Task<Category?> GetByIdAsync(int id);
     Task<int> CreateAsync(CategoryRequest request, int? userId);
     Task<bool> UpdateAsync(int id, CategoryRequest request, int? userId);

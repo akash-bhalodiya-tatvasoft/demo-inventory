@@ -17,18 +17,49 @@ public class UserProfileService : IUserProfileService
         _userService = userService;
     }
 
-    public async Task<IEnumerable<UserProfile>> GetAllAsync()
+    public async Task<IEnumerable<UserProfileResponse>> GetAllAsync(string search)
     {
-        return await _context.UserProfiles
-            .AsNoTracking()
-            .ToListAsync();
+        search = search?.ToLower();
+
+        return await _context.UserProfiles.Include(u => u.User).Where(u =>
+                string.IsNullOrEmpty(search) ||
+                (u.FirstName != null && u.FirstName.ToLower().Contains(search)) ||
+                (u.LastName != null && u.LastName.ToLower().Contains(search)) ||
+                (u.User.Email != null && u.User.Email.ToLower().Contains(search))
+            )
+            .Select((x) => new UserProfileResponse
+            {
+                CreatedAt = x.CreatedAt,
+                CreatedBy = x.CreatedBy,
+                Dob = x.Dob,
+                Email = x.User.Email,
+                FirstName = x.FirstName,
+                Gender = x.Gender,
+                Id = x.Id,
+                LastName = x.LastName,
+                ModifiedAt = x.ModifiedAt,
+                ModifiedBy = x.ModifiedBy,
+                PhoneNumber = x.PhoneNumber,
+            }).AsNoTracking().ToListAsync();
     }
 
-    public async Task<UserProfile?> GetByIdAsync(int id)
+    public async Task<UserProfileResponse?> GetByIdAsync(int id)
     {
-        return await _context.UserProfiles
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.Id == id);
+        return await _context.UserProfiles.Include(u => u.User)
+            .Select((x) => new UserProfileResponse
+            {
+                CreatedAt = x.CreatedAt,
+                CreatedBy = x.CreatedBy,
+                Dob = x.Dob,
+                Email = x.User.Email,
+                FirstName = x.FirstName,
+                Gender = x.Gender,
+                Id = x.Id,
+                LastName = x.LastName,
+                ModifiedAt = x.ModifiedAt,
+                ModifiedBy = x.ModifiedBy,
+                PhoneNumber = x.PhoneNumber,
+            }).AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
     }
 
     public async Task<UserProfile?> GetByUserIdAsync(int userId)

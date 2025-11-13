@@ -25,9 +25,9 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetAllAsync([FromQuery] string search)
     {
-        var categories = await _categoryService.GetAllAsync();
+        var categories = await _categoryService.GetAllAsync(search);
         return StatusCode(
             StatusCodes.Status200OK,
             ApiResponse<IEnumerable<Category>>.SuccessResponse(categories, StatusCodes.Status200OK)

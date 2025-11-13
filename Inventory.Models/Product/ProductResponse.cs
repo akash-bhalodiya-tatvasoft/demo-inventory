@@ -1,6 +1,8 @@
-namespace Inventory.Models.Entities;
+using Inventory.Models.Entities;
 
-public class Product : BaseEntity
+namespace Inventory.Models.Product;
+
+public class ProductResponse : BaseEntity
 {
     public int Id { get; set; }
 
@@ -16,7 +18,6 @@ public class Product : BaseEntity
 
     public DateTime? DiscountEndOn { get; set; }
 
-    public int CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
 
-    public Category Category { get; set; } = null!;
 }

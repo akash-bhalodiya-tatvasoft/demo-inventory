@@ -120,6 +120,31 @@ public class ADODbContext
         }
     }
 
+    public async Task ExecuteProcedure(string procedureName, Dictionary<string, object>? parameters = null)
+    {
+        using var cmd = new NpgsqlCommand(procedureName, _connection);
+        cmd.CommandType = CommandType.StoredProcedure;
+
+        if (parameters != null)
+        {
+            foreach (var item in parameters)
+            {
+                cmd.Parameters.AddWithValue(item.Key, item.Value);
+            }
+        }
+
+        try
+        {
+            await OpenConnectionAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+        finally
+        {
+            await CloseConnectionAsync();
+        }
+    }
+
+
     private static List<T> DataReaderToList<T>(IDataReader dr)
     {
         List<T> list = new List<T>();
