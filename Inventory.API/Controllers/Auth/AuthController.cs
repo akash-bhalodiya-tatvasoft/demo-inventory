@@ -93,14 +93,7 @@ public class AuthController : ControllerBase
             return StatusCode(StatusCodes.Status404NotFound, ApiResponse<string>.Failure(StatusCodes.Status404NotFound, "User not found.", ModelStateHelper.ToErrorResponse(ModelState)));
         }
 
-        var email = HttpContext.User.GetUserEmail();
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token.", ModelStateHelper.ToErrorResponse(ModelState)));
-        }
-        var loggedInUser = await _userService.GetUserByEmailAsync(email);
-
-        var id = await _authService.UpdateUserStatusAsync(userId, loggedInUser.Id, status);
+        var id = await _authService.UpdateUserStatusAsync(userId, (int)HttpContext.Items["UserId"], status);
 
         await _userActivityService.LogAsync(new UserActivityLog
         {
@@ -110,7 +103,7 @@ public class AuthController : ControllerBase
             IpAddress = ipAddress,
             UserAgent = userAgent,
             ActivityModule = (int)ActivityLogModule.User,
-            CreatedBy = loggedInUser.Id
+            CreatedBy = (int)HttpContext.Items["UserId"]
         });
 
         return StatusCode(StatusCodes.Status200OK, ApiResponse<int?>.SuccessResponse(id, StatusCodes.Status200OK));

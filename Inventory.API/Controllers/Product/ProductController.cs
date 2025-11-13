@@ -69,14 +69,7 @@ public class ProductController : ControllerBase
             );
         }
 
-        var email = HttpContext.User.GetUserEmail();
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token.", ModelStateHelper.ToErrorResponse(ModelState)));
-        }
-        var user = await _userService.GetUserByEmailAsync(email);
-
-        var id = await _productService.CreateAsync(request, user?.Id);
+        var id = await _productService.CreateAsync(request, (int)HttpContext.Items["UserId"]);
         return StatusCode(
             StatusCodes.Status201Created,
             ApiResponse<int>.SuccessResponse(id, StatusCodes.Status201Created)
@@ -99,14 +92,7 @@ public class ProductController : ControllerBase
             );
         }
 
-        var email = HttpContext.User.GetUserEmail();
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token.", ModelStateHelper.ToErrorResponse(ModelState)));
-        }
-        var user = await _userService.GetUserByEmailAsync(email);
-
-        var updated = await _productService.UpdateAsync(id, request, user?.Id);
+        var updated = await _productService.UpdateAsync(id, request, (int)HttpContext.Items["UserId"]);
         if (!updated)
         {
             return StatusCode(
@@ -156,16 +142,7 @@ public class ProductController : ControllerBase
             );
         }
 
-        var email = HttpContext.User.GetUserEmail();
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return StatusCode(StatusCodes.Status401Unauthorized,
-                ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token."));
-        }
-
-        var user = await _userService.GetUserByEmailAsync(email);
-
-        await _productService.AddOfferAsync(productId, request, user?.Id);
+        await _productService.AddOfferAsync(productId, request, (int)HttpContext.Items["UserId"]);
 
         return StatusCode(
             StatusCodes.Status200OK,

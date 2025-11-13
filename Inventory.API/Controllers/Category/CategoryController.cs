@@ -61,14 +61,7 @@ public class CategoryController : ControllerBase
             return StatusCode(StatusCodes.Status400BadRequest, ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Invalid request body.", ModelStateHelper.ToErrorResponse(ModelState)));
         }
 
-        var email = HttpContext.User.GetUserEmail();
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token.", ModelStateHelper.ToErrorResponse(ModelState)));
-        }
-        var user = await _userService.GetUserByEmailAsync(email);
-
-        var id = await _categoryService.CreateAsync(request, user?.Id);
+        var id = await _categoryService.CreateAsync(request, (int)HttpContext.Items["UserId"]);
 
         return StatusCode(
             StatusCodes.Status201Created,
@@ -85,14 +78,7 @@ public class CategoryController : ControllerBase
             return StatusCode(StatusCodes.Status400BadRequest, ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Invalid request body.", ModelStateHelper.ToErrorResponse(ModelState)));
         }
 
-        var email = HttpContext.User.GetUserEmail();
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid token.", ModelStateHelper.ToErrorResponse(ModelState)));
-        }
-        var user = await _userService.GetUserByEmailAsync(email);
-
-        var updated = await _categoryService.UpdateAsync(id, request, user?.Id);
+        var updated = await _categoryService.UpdateAsync(id, request, (int)HttpContext.Items["UserId"]);
         if (!updated)
         {
             return StatusCode(
