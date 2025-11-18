@@ -31,6 +31,7 @@ builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IPostService, PostService>();
 
 // DbContext
 builder.Services.AddSingleton<ADODbContext>();
@@ -101,6 +102,12 @@ builder.Services.AddSwaggerGen(c =>
                         }
                 });
             });
+
+// Add HttpClient
+builder.Services.AddHttpClient<IPostService, PostService>(option =>
+{
+    option.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+});
 
 var app = builder.Build();
 

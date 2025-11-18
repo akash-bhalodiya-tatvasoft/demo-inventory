@@ -26,20 +26,23 @@ public class ExceptionMiddleware : IMiddleware
         }
         catch (Exception ex)
         {
-            var email = context.User.GetUserEmail();
-
-            var _userService = context.RequestServices.GetRequiredService<IUserService>();
-
-            var user = await _userService.GetUserByEmailAsync(email);
-
-            var logEvent = new LogEventInfo(NLog.LogLevel.Error, _nlog.Name, ex.Message)
+            if (context.User.Identity.IsAuthenticated)
             {
-                Exception = ex
-            };
-            logEvent.Properties["CreatedBy"] = user.Id;
-            _nlog.Log(logEvent);
+                var email = context.User.GetUserEmail();
 
-            // _logger.LogError(ex, "Unhandled exception occurred. Path: {Path}", context.Request.Path);
+                var _userService = context.RequestServices.GetRequiredService<IUserService>();
+
+                var user = await _userService.GetUserByEmailAsync(email);
+
+                var logEvent = new LogEventInfo(NLog.LogLevel.Error, _nlog.Name, ex.Message)
+                {
+                    Exception = ex
+                };
+                logEvent.Properties["CreatedBy"] = user.Id;
+                _nlog.Log(logEvent);
+
+                // _logger.LogError(ex, "Unhandled exception occurred. Path: {Path}", context.Request.Path);
+            }
 
             var statusCode = (int)HttpStatusCode.InternalServerError;
 
