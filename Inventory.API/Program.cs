@@ -33,6 +33,9 @@ builder.Services.AddScoped<IUserActivityService, UserActivityService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IPostService, PostService>();
 
+// Memory caching service
+builder.Services.AddSingleton<IMemoryCacheService, MemoryCacheService>();
+
 // DbContext
 builder.Services.AddSingleton<ADODbContext>();
 
@@ -108,6 +111,9 @@ builder.Services.AddHttpClient<IPostService, PostService>(option =>
 {
     option.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
 });
+
+// Enable caching
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

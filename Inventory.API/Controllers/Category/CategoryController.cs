@@ -17,14 +17,17 @@ public class CategoryController : ControllerBase
 {
     private readonly ICategoryService _categoryService;
     private readonly IUserService _userService;
+    private readonly IMemoryCacheService _memoryCacheService;
 
-    public CategoryController(ICategoryService categoryService, IUserService userService)
+    public CategoryController(ICategoryService categoryService, IUserService userService, IMemoryCacheService memoryCacheService)
     {
         _categoryService = categoryService;
         _userService = userService;
+        _memoryCacheService = memoryCacheService;
     }
 
     [HttpGet]
+    [TypeFilter(typeof(ResourceCacheFilter), Arguments = new object[] { "category", 60 * 24 })]
     public async Task<IActionResult> GetAllAsync([FromQuery] string search)
     {
         var categories = await _categoryService.GetAllAsync(search);
@@ -63,6 +66,8 @@ public class CategoryController : ControllerBase
 
         var id = await _categoryService.CreateAsync(request, (int)HttpContext.Items["UserId"]);
 
+        await _memoryCacheService.RemoveAsync("category");
+
         return StatusCode(
             StatusCodes.Status201Created,
             ApiResponse<int>.SuccessResponse(id, StatusCodes.Status201Created)
@@ -87,6 +92,8 @@ public class CategoryController : ControllerBase
             );
         }
 
+        await _memoryCacheService.RemoveAsync("category");
+
         return StatusCode(
             StatusCodes.Status200OK,
             ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
@@ -105,6 +112,8 @@ public class CategoryController : ControllerBase
                 ApiResponse<int>.Failure(StatusCodes.Status404NotFound, "Category not found.")
             );
         }
+
+        await _memoryCacheService.RemoveAsync("category");
 
         return StatusCode(
             StatusCodes.Status200OK,
