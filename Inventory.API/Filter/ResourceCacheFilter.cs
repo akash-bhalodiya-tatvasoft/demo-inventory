@@ -8,13 +8,16 @@ public class ResourceCacheFilter : Attribute, IAsyncResourceFilter
 {
     private readonly string _cacheKey;
     private readonly int _durationMinutes;
+    private readonly bool _includeQueryParams;
 
-    public ResourceCacheFilter(string cacheKey, int durationMinutes)
+    public ResourceCacheFilter(
+        string cacheKey,
+        int durationMinutes,
+        bool includeQueryParams = false)
     {
         _cacheKey = cacheKey;
         _durationMinutes = durationMinutes;
-
-
+        _includeQueryParams = includeQueryParams;
     }
 
     public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
@@ -26,10 +29,22 @@ public class ResourceCacheFilter : Attribute, IAsyncResourceFilter
             return;
         }
 
-        var cacheService = context.HttpContext.RequestServices
-                    .GetRequiredService<IMemoryCacheService>();
+        var request = context.HttpContext.Request;
 
-        var result = await cacheService.GetAsync<ObjectResult>(_cacheKey);
+        if (!_includeQueryParams && request.Query.Any())
+        {
+            await next();
+            return;
+        }
+
+        var cacheService = context.HttpContext.RequestServices
+            .GetRequiredService<IMemoryCacheService>();
+
+        var finalCacheKey = _includeQueryParams && request.Query.Any()
+            ? $"{_cacheKey}:{request.Path}:{request.QueryString}"
+            : $"{_cacheKey}:{request.Path}";
+
+        var result = await cacheService.GetAsync<ObjectResult>(finalCacheKey);
 
         if (result != null)
         {
@@ -43,7 +58,7 @@ public class ResourceCacheFilter : Attribute, IAsyncResourceFilter
             actionResult.StatusCode == 200 &&
             actionResult.Value is not null)
         {
-            cacheService.SetAsync(_cacheKey, actionContext.Result, TimeSpan.FromMinutes(_durationMinutes));
+            await cacheService.SetAsync(finalCacheKey, actionContext.Result, TimeSpan.FromMinutes(_durationMinutes));
         }
     }
 

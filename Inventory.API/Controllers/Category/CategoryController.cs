@@ -27,7 +27,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet]
-    [TypeFilter(typeof(ResourceCacheFilter), Arguments = new object[] { "category", 60 * 24 })]
+    [TypeFilter(typeof(ResourceCacheFilter), Arguments = new object[] { "category", 60 * 24, false })]
     public async Task<IActionResult> GetAllAsync([FromQuery] string search)
     {
         var categories = await _categoryService.GetAllAsync(search);
