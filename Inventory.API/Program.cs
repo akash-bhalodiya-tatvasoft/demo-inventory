@@ -1,11 +1,14 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using Inventory.API.Filter;
 using Inventory.API.Middleware;
+using Inventory.Common.Responses;
 using Inventory.Context;
 using Inventory.Services.Auth;
 using Inventory.Services.Implementations;
 using Inventory.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -72,6 +75,33 @@ builder.Services.AddAuthentication(configureOptions =>
 // CORS
 builder.Services.AddCors(options => options.AddPolicy("InventoryCORS", policy => policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000")));
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("Fixed", httpContext =>
+    RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "localhost",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 3,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        }));
+    options.OnRejected = async (context, cancellationToken) =>
+        {
+            context.HttpContext.Response.StatusCode =
+              StatusCodes.Status429TooManyRequests;
+            context.HttpContext.Response.ContentType = "application/json";
+
+            var response = ApiResponse<string>.Failure(
+                StatusCodes.Status429TooManyRequests,
+                "Rate limit exceeded."
+            );
+
+            await context.HttpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+        };
+});
+
 // Generate Swagger UI
 builder.Services.AddSwaggerGen(c =>
             {
@@ -115,6 +145,8 @@ builder.Services.AddHttpClient<IPostService, PostService>(option =>
 // Enable caching
 builder.Services.AddMemoryCache();
 
+builder.Services.AddResponseCaching();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -130,11 +162,15 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseRateLimiter();
+
 app.UseAuthentication();
 
 app.UseMiddleware<UserContextMiddleware>();
 
 app.UseAuthorization();
+
+app.UseResponseCaching();
 
 app.MapControllers();
 

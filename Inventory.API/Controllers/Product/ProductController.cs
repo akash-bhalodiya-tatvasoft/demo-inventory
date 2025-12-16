@@ -6,6 +6,7 @@ using Inventory.Models.Product;
 using Inventory.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using static Inventory.Common.Enums.GlobalEnum;
 
 namespace Inventory.API.Controllers;
@@ -26,6 +27,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
+    [EnableRateLimiting("Fixed")]
     public async Task<IActionResult> GetAllAsync([FromQuery] string search)
     {
         var products = await _productService.GetAllAsync(search);

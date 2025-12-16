@@ -38,6 +38,7 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [ResponseCache(Duration = 60)]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
         var category = await _categoryService.GetByIdAsync(id);
