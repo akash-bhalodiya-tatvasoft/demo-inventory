@@ -50,6 +50,7 @@ builder.Services.AddScoped<PermissionFilter>();
 
 // Background Jobs
 builder.Services.AddHostedService<UserInactiveService>();
+builder.Services.AddHostedService<LoadProductInCache>();
 
 // NLog
 NLog.LogManager.Configuration.Variables["DefaultString"] =

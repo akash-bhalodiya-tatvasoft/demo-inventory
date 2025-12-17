@@ -11,25 +11,38 @@ namespace Inventory.Services;
 public class ProductService : IProductService
 {
     private readonly ADODbContext _adoDbContext;
+    private readonly IMemoryCacheService _memoryCacheService;
 
-    public ProductService(ADODbContext adoDbContext)
+    public ProductService(ADODbContext adoDbContext, IMemoryCacheService memoryCacheService)
     {
         _adoDbContext = adoDbContext;
+        _memoryCacheService = memoryCacheService;
     }
 
     public async Task<IEnumerable<ProductResponse?>> GetAllAsync(string search)
     {
-        search = search?.ToLower();
 
-        string query = @"SELECT p.*, c.""Name"" as ""CategoryName"" FROM ""Products"" AS p INNER JOIN ""Categories"" AS c ON p.""CategoryId"" = c.""Id"" WHERE LOWER(p.""Name"") LIKE @Search OR LOWER(p.""Description"") LIKE @Search OR LOWER(c.""Name"") LIKE @Search";
-        var parameters = new Dictionary<string, object>
+        var cachedProduct = await _memoryCacheService.GetAsync<IEnumerable<ProductResponse?>>("Product");
+
+        if (cachedProduct == null)
+        {
+            search = search?.ToLower();
+
+            string query = @"SELECT p.*, c.""Name"" as ""CategoryName"" FROM ""Products"" AS p INNER JOIN ""Categories"" AS c ON p.""CategoryId"" = c.""Id"" WHERE LOWER(p.""Name"") LIKE @Search OR LOWER(p.""Description"") LIKE @Search OR LOWER(c.""Name"") LIKE @Search";
+            var parameters = new Dictionary<string, object>
         {
             { "Search", $"%{search}%" },
         };
 
 
-        var product = await _adoDbContext.ExecuteQueryGetList<ProductResponse>(query, parameters);
-        return product;
+            var product = await _adoDbContext.ExecuteQueryGetList<ProductResponse>(query, parameters);
+            await _memoryCacheService.SetAsync("Product", product, TimeSpan.FromMinutes(60 * 24 * 90));
+            return product;
+        }
+        else
+        {
+            return cachedProduct;
+        }
     }
 
     public async Task<ProductResponse?> GetByIdAsync(int id)
@@ -68,6 +81,9 @@ public class ProductService : IProductService
         };
 
         var createdProductId = await _adoDbContext.ExecuteQuery<int>(query, parameters);
+
+        await _memoryCacheService.RemoveAsync("Product");
+
         return createdProductId;
     }
 
@@ -109,6 +125,9 @@ public class ProductService : IProductService
         };
 
         var productId = await _adoDbContext.ExecuteQuery<int>(query, parameters);
+
+        await _memoryCacheService.RemoveAsync("Product");
+
         return productId > 0;
     }
 
@@ -121,6 +140,9 @@ public class ProductService : IProductService
         };
 
         var result = await _adoDbContext.ExecuteQuery<int>(query, parameters);
+
+        await _memoryCacheService.RemoveAsync("Product");
+
         return result > 0;
     }
 
@@ -135,5 +157,7 @@ public class ProductService : IProductService
         };
 
         await _adoDbContext.ExecuteProcedure("public.sp_add_product_offer", parameters);
+
+        await _memoryCacheService.RemoveAsync("Product");
     }
 }
