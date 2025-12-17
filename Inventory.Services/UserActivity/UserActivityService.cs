@@ -3,7 +3,7 @@ using Inventory.Models.Entities;
 using Inventory.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Inventory.Services.Implementations;
+namespace Inventory.Services;
 
 public class UserActivityService : IUserActivityService
 {

@@ -17,7 +17,7 @@ public class User : BaseEntity
 
     public bool IsActive { get; set; } = true;
     public string Permissions { get; set; } = JsonSerializer.Serialize(new UserPermissions());
-
+    public DateTime? LastLogin { get; set; }
 
     public UserProfile UserProfile { get; set; } = null!;
 

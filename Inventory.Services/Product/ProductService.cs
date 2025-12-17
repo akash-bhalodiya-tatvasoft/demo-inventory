@@ -6,7 +6,7 @@ using Inventory.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 
-namespace Inventory.Services.Implementations;
+namespace Inventory.Services;
 
 public class ProductService : IProductService
 {

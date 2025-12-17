@@ -3,7 +3,7 @@ using Inventory.Models.Entities;
 using Inventory.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Inventory.Services.Implementations;
+namespace Inventory.Services;
 
 public class UserService : IUserService
 {
@@ -36,5 +36,23 @@ public class UserService : IUserService
             return null;
 
         return user;
+    }
+
+
+
+    public async Task<int> MarkUserInactive(int inactiveMonths)
+    {
+        var cutoffDate = DateTimeOffset.UtcNow.AddMonths(-inactiveMonths);
+
+        var affectedRows = await _context.Users
+            .Where(u =>
+                u.IsActive &&
+                u.LastLogin != null &&
+                u.LastLogin <= cutoffDate)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.IsActive, false)
+            );
+
+        return affectedRows;
     }
 }

@@ -1,7 +1,7 @@
 using Inventory.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Inventory.Services.Implementations;
+namespace Inventory.Services;
 
 public class MemoryCacheService : IMemoryCacheService
 {

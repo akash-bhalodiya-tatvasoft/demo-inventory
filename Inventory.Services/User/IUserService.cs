@@ -6,4 +6,5 @@ public interface IUserService
 {
     Task<User?> GetUserByIdAsync(int id);
     Task<User?> GetUserByEmailAsync(string email);
+    Task<int> MarkUserInactive(int userId);
 }

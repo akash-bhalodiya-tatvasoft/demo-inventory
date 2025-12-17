@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Inventory.Services.Implementations;
+namespace Inventory.Services;
 
 public class AuthService : IAuthService
 {
@@ -57,6 +57,9 @@ public class AuthService : IAuthService
         var hashedInput = GenerateEncryptedPassword(request.Password);
         if (hashedInput != user.PasswordHash)
             return null;
+
+        user.LastLogin = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
 
         return GenerateJwtToken(user);
     }

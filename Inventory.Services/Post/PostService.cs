@@ -3,7 +3,7 @@ using Inventory.Context;
 using Inventory.Models.Post;
 using Inventory.Services.Interfaces;
 
-namespace Inventory.Services.Implementations;
+namespace Inventory.Services;
 
 public class PostService : IPostService
 {

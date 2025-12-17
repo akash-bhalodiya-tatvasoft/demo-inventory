@@ -5,7 +5,7 @@ using Inventory.API.Middleware;
 using Inventory.Common.Responses;
 using Inventory.Context;
 using Inventory.Services.Auth;
-using Inventory.Services.Implementations;
+using Inventory.Services;
 using Inventory.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
@@ -47,6 +47,9 @@ builder.Services.AddTransient<ExceptionMiddleware>();
 
 // Filter
 builder.Services.AddScoped<PermissionFilter>();
+
+// Background Jobs
+builder.Services.AddHostedService<UserInactiveService>();
 
 // NLog
 NLog.LogManager.Configuration.Variables["DefaultString"] =

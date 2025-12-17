@@ -4,7 +4,7 @@ using Inventory.Models.Entities;
 using Inventory.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Inventory.Services.Implementations;
+namespace Inventory.Services;
 
 public class CategoryService : ICategoryService
 {
