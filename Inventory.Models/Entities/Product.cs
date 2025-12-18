@@ -14,7 +14,7 @@ public class Product : BaseEntity
 
     public decimal DiscountedPrice { get; set; }
 
-    public DateTime? DiscountEndOn { get; set; }
+    public DateOnly? DiscountEndOn { get; set; }
 
     public int CategoryId { get; set; }
 
