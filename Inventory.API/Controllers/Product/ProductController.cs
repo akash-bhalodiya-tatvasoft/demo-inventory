@@ -14,6 +14,8 @@ namespace Inventory.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
+[ApiVersion("1.0")]
+[ApiVersion("2.0")]
 public class ProductController : ControllerBase
 {
     private readonly IProductService _productService;
@@ -28,7 +30,20 @@ public class ProductController : ControllerBase
 
     [HttpGet]
     [EnableRateLimiting("Fixed")]
-    public async Task<IActionResult> GetAllAsync([FromQuery] string search)
+    [MapToApiVersion("1.0")]
+    public async Task<IActionResult> GetAllAsyncV1()
+    {
+        var products = await _productService.GetAllAsync("");
+        return StatusCode(
+            StatusCodes.Status200OK,
+            ApiResponse<IEnumerable<ProductResponse>>.SuccessResponse(products, StatusCodes.Status200OK)
+        );
+    }
+
+    [HttpGet]
+    [EnableRateLimiting("Fixed")]
+    [MapToApiVersion("2.0")]
+    public async Task<IActionResult> GetAllAsyncV2([FromQuery] string search)
     {
         var products = await _productService.GetAllAsync(search);
         return StatusCode(

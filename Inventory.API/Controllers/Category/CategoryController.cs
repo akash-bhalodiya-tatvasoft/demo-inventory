@@ -13,6 +13,8 @@ namespace Inventory.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Roles = $"{nameof(UserRole.SuperAdmin)},{nameof(UserRole.Admin)}")]
+[ApiVersion("1.0")]
+[ApiVersion("2.0")]
 public class CategoryController : ControllerBase
 {
     private readonly ICategoryService _categoryService;

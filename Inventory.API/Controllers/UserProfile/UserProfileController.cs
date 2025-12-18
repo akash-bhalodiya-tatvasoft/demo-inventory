@@ -14,6 +14,8 @@ namespace Inventory.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
+[ApiVersion("1.0")]
+[ApiVersion("2.0")]
 public class UserProfileController : ControllerBase
 {
     private readonly IUserProfileService _profileService;

@@ -12,6 +12,8 @@ namespace Inventory.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[ApiVersion("1.0")]
+[ApiVersion("2.0")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
