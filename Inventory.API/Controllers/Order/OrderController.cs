@@ -57,14 +57,6 @@ public class OrderController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateAsync([FromBody] OrderRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            return StatusCode(
-                StatusCodes.Status400BadRequest,
-                ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Invalid request body.", ModelStateHelper.ToErrorResponse(ModelState))
-            );
-        }
-
         foreach (var item in request.OrderItems)
         {
             var product = await _productService.GetByIdAsync(item.ProductId);

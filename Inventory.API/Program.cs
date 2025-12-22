@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Mapster;
 using MapsterMapper;
 using Inventory.API.Mapping;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
     {
         options.SuppressModelStateInvalidFilter = true;
+    }).AddFluentValidation(option =>
+    {
+        option.RegisterValidatorsFromAssemblyContaining<OrderRequestValidator>();
     });
 
 // Connect to Database
