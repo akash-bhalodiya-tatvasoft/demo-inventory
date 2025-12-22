@@ -3,6 +3,7 @@ using Inventory.Context;
 using Inventory.Models.Entities;
 using Inventory.Models.Order;
 using Inventory.Services.Interfaces;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.Services;
@@ -86,26 +87,7 @@ public class OrderService : IOrderService
         .Include(o => o.OrderItems)
         .ThenInclude(oi => oi.Product)
         .AsNoTracking()
-        .Select(o => new OrderResponse
-        {
-            Id = o.Id,
-            UserId = o.UserId,
-            Status = o.Status,
-            UserName = o.User != null && o.User.UserProfile != null
-                ? $"{o.User.UserProfile.FirstName} {o.User.UserProfile.LastName}"
-                : String.Empty,
-            TotalAmount = o.TotalAmount,
-            CreatedAt = o.CreatedAt,
-            OrderItems = o.OrderItems.Select(oi => new OrderItemResponse
-            {
-                Id = oi.Id,
-                ProductId = oi.ProductId,
-                ProductName = oi.Product != null ? oi.Product.Name : String.Empty,
-                Quantity = oi.Quantity,
-                UnitPrice = oi.UnitPrice,
-                TotalPrice = oi.TotalPrice
-            }).ToList()
-        })
+        .ProjectToType<OrderResponse>()
         .ToListAsync();
     }
 
@@ -113,27 +95,9 @@ public class OrderService : IOrderService
     {
         var order = await _context.Orders
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Product).Select(o => new OrderResponse
-                {
-                    Id = o.Id,
-                    UserId = o.UserId,
-                    Status = o.Status,
-                    UserName = o.User != null && o.User.UserProfile != null
-                ? $"{o.User.UserProfile.FirstName} {o.User.UserProfile.LastName}"
-                : String.Empty,
-                    TotalAmount = o.TotalAmount,
-                    CreatedAt = o.CreatedAt,
-                    OrderItems = o.OrderItems.Select(oi => new OrderItemResponse
-                    {
-                        Id = oi.Id,
-                        ProductId = oi.ProductId,
-                        ProductName = oi.Product != null ? oi.Product.Name : String.Empty,
-                        Quantity = oi.Quantity,
-                        UnitPrice = oi.UnitPrice,
-                        TotalPrice = oi.TotalPrice
-                    }).ToList()
-                })
+                .ThenInclude(oi => oi.Product)
                 .AsNoTracking()
+                .ProjectToType<OrderResponse>()
                 .FirstOrDefaultAsync(o => o.Id == id);
 
         if (order == null) return null;

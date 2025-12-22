@@ -14,6 +14,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Mapster;
+using MapsterMapper;
+using Inventory.API.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,6 +54,14 @@ builder.Services.AddScoped<PermissionFilter>();
 // Background Jobs
 builder.Services.AddHostedService<UserInactiveService>();
 builder.Services.AddHostedService<LoadProductInCache>();
+
+
+// Mapster
+var config = TypeAdapterConfig.GlobalSettings;
+config.Scan(typeof(OrderMappingConfig).Assembly);
+
+builder.Services.AddSingleton(config);
+builder.Services.AddScoped<IMapper, ServiceMapper>();
 
 // NLog
 NLog.LogManager.Configuration.Variables["DefaultString"] =
