@@ -86,4 +86,43 @@ public class OrderController : ControllerBase
         );
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] OrderRequest request)
+    {
+        var result = await _orderService.UpdateAsync(id, request, (int)HttpContext.Items["UserId"]);
+
+        if (!result)
+        {
+            return StatusCode(
+                StatusCodes.Status400BadRequest,
+                ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Order update failed.")
+            );
+        }
+
+        return StatusCode(
+            StatusCodes.Status200OK,
+            ApiResponse<string>.SuccessResponse("Order updated successfully.", StatusCodes.Status200OK)
+        );
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteAsync(int id)
+    {
+        var result = await _orderService.DeleteAsync(id, (int)HttpContext.Items["UserId"]);
+
+        if (!result)
+        {
+            return StatusCode(
+                StatusCodes.Status404NotFound,
+                ApiResponse<string>.Failure(StatusCodes.Status404NotFound, "Order not found.")
+            );
+        }
+
+        return StatusCode(
+            StatusCodes.Status200OK,
+            ApiResponse<string>.SuccessResponse("Order deleted successfully.", StatusCodes.Status200OK)
+        );
+    }
+
+
 }

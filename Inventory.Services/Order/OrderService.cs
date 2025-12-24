@@ -104,4 +104,112 @@ public class OrderService : IOrderService
 
         return order;
     }
+
+    public async Task<bool> DeleteAsync(int id, int userId)
+    {
+
+        var order = await _context.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null)
+            return false;
+
+        var now = DateTime.UtcNow;
+
+        foreach (var item in order.OrderItems)
+        {
+            var product = await _context.Products.FindAsync(item.ProductId);
+            if (product != null)
+            {
+                product.Quantity += item.Quantity;
+                product.ModifiedAt = now;
+                product.ModifiedBy = userId;
+            }
+        }
+
+        _context.OrderItems.RemoveRange(order.OrderItems);
+        _context.Orders.Remove(order);
+
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> UpdateAsync(int id, OrderRequest request, int userId)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
+                return false;
+
+            var now = DateTime.UtcNow;
+
+            foreach (var oldItem in order.OrderItems)
+            {
+                var product = await _context.Products.FindAsync(oldItem.ProductId);
+                if (product != null)
+                {
+                    product.Quantity += oldItem.Quantity;
+                    product.ModifiedAt = now;
+                    product.ModifiedBy = userId;
+                }
+            }
+
+            _context.OrderItems.RemoveRange(order.OrderItems);
+
+            var productIds = request.OrderItems.Select(x => x.ProductId).ToList();
+            var products = await _context.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync();
+
+            var newItems = new List<OrderItem>();
+
+            foreach (var item in request.OrderItems)
+            {
+                var product = products.FirstOrDefault(p => p.Id == item.ProductId);
+                if (product == null || product.Quantity < item.Quantity)
+                {
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                product.Quantity -= item.Quantity;
+                product.ModifiedAt = now;
+                product.ModifiedBy = userId;
+
+                newItems.Add(new OrderItem
+                {
+                    ProductId = product.Id,
+                    Quantity = item.Quantity,
+                    UnitPrice = product.Price,
+                    TotalPrice = product.Price * item.Quantity,
+                    CreatedAt = now,
+                    CreatedBy = userId
+                });
+            }
+
+            order.OrderItems = newItems;
+            order.Status = request.Status;
+            order.TotalAmount = newItems.Sum(x => x.TotalPrice);
+            order.ModifiedAt = now;
+            order.ModifiedBy = userId;
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            return false;
+        }
+    }
 }
