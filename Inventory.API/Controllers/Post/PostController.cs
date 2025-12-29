@@ -1,3 +1,4 @@
+using Inventory.Common.Helpers;
 using Inventory.Common.Responses;
 using Inventory.Models.Post;
 using Inventory.Services.Interfaces;
@@ -36,9 +37,14 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetByIdAsync(int id)
+    public async Task<IActionResult> GetByIdAsync(string id)
     {
-        var post = await _postService.GetByIdAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var post = await _postService.GetByIdAsync(convertedId);
         if (post == null)
         {
             return StatusCode(
@@ -65,14 +71,20 @@ public class PostController : ControllerBase
         }
         return StatusCode(
             StatusCodes.Status201Created,
-            ApiResponse<int>.SuccessResponse(id ?? 0, StatusCodes.Status201Created)
+            ApiResponse<string>.SuccessResponse(EncryptionHelper.EncryptId(id.ToString()), StatusCodes.Status201Created)
         );
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAsync(int id, PostRequest request)
+    public async Task<IActionResult> UpdateAsync(string id, PostRequest request)
     {
-        var result = await _postService.UpdateAsync(id, request);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+
+        var result = await _postService.UpdateAsync(convertedId, request);
         if (result == null)
         {
             return StatusCode(
@@ -82,14 +94,20 @@ public class PostController : ControllerBase
         }
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+            ApiResponse<string>.SuccessResponse(id, StatusCodes.Status200OK)
         );
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteAsync(int id)
+    public async Task<IActionResult> DeleteAsync(string id)
     {
-        var result = await _postService.DeleteAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+
+        var result = await _postService.DeleteAsync(convertedId);
         if (result == null)
         {
             return StatusCode(
@@ -99,7 +117,7 @@ public class PostController : ControllerBase
         }
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+            ApiResponse<string>.SuccessResponse(id, StatusCodes.Status200OK)
         );
     }
 }

@@ -19,8 +19,14 @@ public class PostService : IPostService
         try
         {
             var url = "posts";
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<PostResponse>>(url);
-            return result;
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<APIPostResponse>>(url);
+            return result.Select(p => new PostResponse
+            {
+                Id = p.Id,
+                UserId = p.UserId,
+                Title = p.Title,
+                Body = p.Body
+            });
         }
         catch (Exception ex)
         {
@@ -33,8 +39,14 @@ public class PostService : IPostService
         try
         {
             var url = $"posts/{id}";
-            var result = await _httpClient.GetFromJsonAsync<PostResponse>(url);
-            return result;
+            var result = await _httpClient.GetFromJsonAsync<APIPostResponse>(url);
+            return new PostResponse
+            {
+                Id = result.Id,
+                UserId = result.UserId,
+                Title = result.Title,
+                Body = result.Body
+            };
         }
         catch (Exception ex)
         {
