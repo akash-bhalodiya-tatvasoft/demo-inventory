@@ -94,6 +94,7 @@ builder.Services.AddAuthentication(configureOptions =>
 // CORS
 builder.Services.AddCors(options => options.AddPolicy("InventoryCORS", policy => policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000")));
 
+// Rate limiting
 builder.Services.AddRateLimiter(options =>
 {
     options.AddPolicy("Fixed", httpContext =>

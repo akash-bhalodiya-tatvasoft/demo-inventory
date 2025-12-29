@@ -39,11 +39,16 @@ public class CategoryController : ControllerBase
         );
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id}")]
     [ResponseCache(Duration = 60)]
-    public async Task<IActionResult> GetByIdAsync(int id)
+    public async Task<IActionResult> GetByIdAsync(string id)
     {
-        var category = await _categoryService.GetByIdAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var category = await _categoryService.GetByIdAsync(convertedId);
         if (category == null)
         {
             return StatusCode(
@@ -73,20 +78,24 @@ public class CategoryController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status201Created,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status201Created)
+            ApiResponse<string>.SuccessResponse(EncryptionHelper.EncryptId(id.ToString()), StatusCodes.Status201Created)
         );
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id}")]
     [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Update })]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] CategoryRequest request)
+    public async Task<IActionResult> UpdateAsync(string id, [FromBody] CategoryRequest request)
     {
         if (!ModelState.IsValid)
         {
             return StatusCode(StatusCodes.Status400BadRequest, ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Invalid request body.", ModelStateHelper.ToErrorResponse(ModelState)));
         }
-
-        var updated = await _categoryService.UpdateAsync(id, request, (int)HttpContext.Items["UserId"]);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var updated = await _categoryService.UpdateAsync(convertedId, request, (int)HttpContext.Items["UserId"]);
         if (!updated)
         {
             return StatusCode(
@@ -99,15 +108,21 @@ public class CategoryController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+            ApiResponse<string>.SuccessResponse(id, StatusCodes.Status200OK)
         );
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id}")]
     [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Delete })]
-    public async Task<IActionResult> DeleteAsync(int id)
+    public async Task<IActionResult> DeleteAsync(string id)
     {
-        var deleted = await _categoryService.DeleteAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+
+        var deleted = await _categoryService.DeleteAsync(convertedId);
         if (!deleted)
         {
             return StatusCode(
@@ -120,7 +135,7 @@ public class CategoryController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+            ApiResponse<string>.SuccessResponse(id, StatusCodes.Status200OK)
         );
     }
 }

@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <ProjectReference Include="..\Inventory.Models\Inventory.Models.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
