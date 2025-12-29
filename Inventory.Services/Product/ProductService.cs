@@ -1,4 +1,5 @@
 using System.Data;
+using Inventory.Common.Helpers;
 using Inventory.Context;
 using Inventory.Models.Entities;
 using Inventory.Models.Product;
@@ -75,7 +76,7 @@ public class ProductService : IProductService
             { "Quantity", product.Quantity },
             { "DiscountedPrice", product.DiscountedPrice },
             { "DiscountEndOn", product.DiscountEndOn ?? (object)DBNull.Value },
-            { "CategoryId", product.CategoryId },
+            { "CategoryId", int.Parse(EncryptionHelper.DecryptId(product.EnvryptedCategoryId)) },
             { "CreatedAt", DateTime.UtcNow },
             { "CreatedBy", userId ?? (object)DBNull.Value },
         };
@@ -119,7 +120,7 @@ public class ProductService : IProductService
             { "Quantity", product.Quantity },
             { "DiscountedPrice", product.DiscountedPrice },
             { "DiscountEndOn", product.DiscountEndOn ?? (object)DBNull.Value },
-            { "CategoryId", product.CategoryId },
+            { "CategoryId", int.Parse(EncryptionHelper.DecryptId(product.EnvryptedCategoryId)) },
             { "ModifiedAt", DateTime.UtcNow },
             { "ModifiedBy", userId ?? (object)DBNull.Value },
         };

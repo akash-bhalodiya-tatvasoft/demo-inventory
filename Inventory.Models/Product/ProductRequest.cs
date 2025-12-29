@@ -23,6 +23,5 @@ public class ProductRequest
     public DateTime? DiscountEndOn { get; set; }
 
     [Required(ErrorMessage = "Category ID is required.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Invalid Category ID.")]
-    public int CategoryId { get; set; }
+    public string EnvryptedCategoryId { get; set; }
 }

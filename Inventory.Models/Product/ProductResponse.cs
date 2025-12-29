@@ -1,10 +1,17 @@
+using System.Text.Json.Serialization;
+using Inventory.Common.Helpers;
 using Inventory.Models.Entities;
 
 namespace Inventory.Models.Product;
 
 public class ProductResponse : BaseEntity
 {
+    [JsonIgnore]
     public int Id { get; set; }
+    public string EncryptedId
+    {
+        get => EncryptionHelper.EncryptId(Id.ToString());
+    }
 
     public string Name { get; set; } = string.Empty;
 

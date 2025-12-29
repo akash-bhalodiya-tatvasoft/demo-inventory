@@ -52,10 +52,15 @@ public class ProductController : ControllerBase
         );
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetByIdAsync(int id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetByIdAsync(string id)
     {
-        var product = await _productService.GetByIdAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var product = await _productService.GetByIdAsync(convertedId);
         if (product == null)
         {
             return StatusCode(
@@ -89,13 +94,13 @@ public class ProductController : ControllerBase
         var id = await _productService.CreateAsync(request, (int)HttpContext.Items["UserId"]);
         return StatusCode(
             StatusCodes.Status201Created,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status201Created)
+            ApiResponse<string>.SuccessResponse(EncryptionHelper.EncryptId(id.ToString()), StatusCodes.Status201Created)
         );
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id}")]
     [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Update })]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] ProductRequest request)
+    public async Task<IActionResult> UpdateAsync(string id, [FromBody] ProductRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -109,7 +114,12 @@ public class ProductController : ControllerBase
             );
         }
 
-        var updated = await _productService.UpdateAsync(id, request, (int)HttpContext.Items["UserId"]);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var updated = await _productService.UpdateAsync(convertedId, request, (int)HttpContext.Items["UserId"]);
         if (!updated)
         {
             return StatusCode(
@@ -120,15 +130,20 @@ public class ProductController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+            ApiResponse<string>.SuccessResponse(id, StatusCodes.Status200OK)
         );
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id}")]
     [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Delete })]
-    public async Task<IActionResult> DeleteAsync(int id)
+    public async Task<IActionResult> DeleteAsync(string id)
     {
-        var deleted = await _productService.DeleteAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var deleted = await _productService.DeleteAsync(convertedId);
         if (!deleted)
         {
             return StatusCode(
@@ -139,7 +154,7 @@ public class ProductController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+            ApiResponse<string>.SuccessResponse(id, StatusCodes.Status200OK)
         );
     }
 
