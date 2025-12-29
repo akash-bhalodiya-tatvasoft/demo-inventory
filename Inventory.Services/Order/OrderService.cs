@@ -1,4 +1,5 @@
 using System.Data;
+using Inventory.Common.Helpers;
 using Inventory.Context;
 using Inventory.Models.Entities;
 using Inventory.Models.Order;
@@ -27,12 +28,12 @@ public class OrderService : IOrderService
             var orderItems = new List<OrderItem>();
 
             var products = await _context.Products
-                            .Where(p => orderRequest.OrderItems.Select(x => x.ProductId).ToList().Contains(p.Id))
+                            .Where(p => orderRequest.OrderItems.Select(x => int.Parse(EncryptionHelper.DecryptId(x.ProductIdEnc))).ToList().Contains(p.Id))
                             .ToListAsync();
 
             foreach (var item in orderRequest.OrderItems)
             {
-                var product = products.FirstOrDefault(p => p.Id == item.ProductId);
+                var product = products.FirstOrDefault(p => p.Id == int.Parse(EncryptionHelper.DecryptId(item.ProductIdEnc)));
                 if (product == null || product.Quantity < item.Quantity)
                 {
                     return null;
@@ -164,7 +165,7 @@ public class OrderService : IOrderService
 
             _context.OrderItems.RemoveRange(order.OrderItems);
 
-            var productIds = request.OrderItems.Select(x => x.ProductId).ToList();
+            var productIds = request.OrderItems.Select(x => int.Parse(EncryptionHelper.DecryptId(x.ProductIdEnc))).ToList();
             var products = await _context.Products
                 .Where(p => productIds.Contains(p.Id))
                 .ToListAsync();
@@ -173,7 +174,7 @@ public class OrderService : IOrderService
 
             foreach (var item in request.OrderItems)
             {
-                var product = products.FirstOrDefault(p => p.Id == item.ProductId);
+                var product = products.FirstOrDefault(p => p.Id == int.Parse(EncryptionHelper.DecryptId(item.ProductIdEnc)));
                 if (product == null || product.Quantity < item.Quantity)
                 {
                     await transaction.RollbackAsync();

@@ -5,8 +5,8 @@ public class OrderItemRequestValidator : AbstractValidator<OrderItemRequest>
 {
     public OrderItemRequestValidator()
     {
-        RuleFor(x => x.ProductId)
-            .GreaterThan(0)
+        RuleFor(x => x.ProductIdEnc)
+            .NotEmpty()
             .WithMessage("ProductId is required.");
 
         RuleFor(x => x.Quantity)

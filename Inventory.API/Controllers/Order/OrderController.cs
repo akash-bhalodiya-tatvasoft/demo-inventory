@@ -36,10 +36,15 @@ public class OrderController : ControllerBase
         );
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetByIdAsync(int id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetByIdAsync(string id)
     {
-        var order = await _orderService.GetByIdAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var order = await _orderService.GetByIdAsync(convertedId);
         if (order == null)
         {
             return StatusCode(
@@ -59,7 +64,7 @@ public class OrderController : ControllerBase
     {
         foreach (var item in request.OrderItems)
         {
-            var product = await _productService.GetByIdAsync(item.ProductId);
+            var product = await _productService.GetByIdAsync(int.Parse(EncryptionHelper.DecryptId(item.ProductIdEnc)));
             if (product == null || product.Quantity < item.Quantity)
             {
                 return StatusCode(
@@ -82,14 +87,19 @@ public class OrderController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status201Created,
-            ApiResponse<int>.SuccessResponse((int)id, StatusCodes.Status201Created)
+            ApiResponse<string>.SuccessResponse(EncryptionHelper.EncryptId(id.ToString()), StatusCodes.Status201Created)
         );
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] OrderRequest request)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateAsync(string id, [FromBody] OrderRequest request)
     {
-        var result = await _orderService.UpdateAsync(id, request, (int)HttpContext.Items["UserId"]);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var result = await _orderService.UpdateAsync(convertedId, request, (int)HttpContext.Items["UserId"]);
 
         if (!result)
         {
@@ -105,10 +115,15 @@ public class OrderController : ControllerBase
         );
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteAsync(int id)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteAsync(string id)
     {
-        var result = await _orderService.DeleteAsync(id, (int)HttpContext.Items["UserId"]);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var result = await _orderService.DeleteAsync(convertedId, (int)HttpContext.Items["UserId"]);
 
         if (!result)
         {

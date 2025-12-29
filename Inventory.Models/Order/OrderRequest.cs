@@ -11,7 +11,7 @@ public class OrderRequest
 
 public class OrderItemRequest
 {
-    public int ProductId { get; set; }
+    public string ProductIdEnc { get; set; }
 
     public int Quantity { get; set; }
 }
