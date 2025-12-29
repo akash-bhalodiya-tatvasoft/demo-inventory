@@ -5,7 +5,7 @@ namespace Inventory.Models.UserProfiles;
 public class UserProfileRequest
 {
     [Required(ErrorMessage = "UserId is required.")]
-    public int UserId { get; set; }
+    public string EncryptedUserId { get; set; }
 
     [Required(ErrorMessage = "First name is required.")]
     [MaxLength(100, ErrorMessage = "First name cannot exceed 100 characters.")]

@@ -1,3 +1,4 @@
+using Inventory.Common.Helpers;
 using Inventory.Context;
 using Inventory.Models.Entities;
 using Inventory.Models.UserProfiles;
@@ -72,7 +73,7 @@ public class UserProfileService : IUserProfileService
     public async Task<int?> CreateAsync(UserProfileRequest request, int? userId)
     {
 
-        var user = await _userService.GetUserByIdAsync(request.UserId);
+        var user = await _userService.GetUserByIdAsync(int.Parse(EncryptionHelper.DecryptId(request.EncryptedUserId)));
 
         if (user == null)
         {
@@ -81,7 +82,7 @@ public class UserProfileService : IUserProfileService
 
         var entity = new UserProfile
         {
-            UserId = request.UserId,
+            UserId = int.Parse(EncryptionHelper.DecryptId(request.EncryptedUserId)),
             FirstName = request.FirstName,
             LastName = request.LastName,
             Gender = !string.IsNullOrWhiteSpace(request.Gender) ? request.Gender : "",

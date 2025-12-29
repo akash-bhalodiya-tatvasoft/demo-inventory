@@ -37,10 +37,15 @@ public class UserProfileController : ControllerBase
         );
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetByIdAsync(int id)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetByIdAsync(string id)
     {
-        var profile = await _profileService.GetByIdAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var profile = await _profileService.GetByIdAsync(convertedId);
         if (profile == null)
         {
             return StatusCode(
@@ -77,20 +82,25 @@ public class UserProfileController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status201Created,
-            ApiResponse<int>.SuccessResponse(id.Value, StatusCodes.Status201Created)
+            ApiResponse<string>.SuccessResponse(EncryptionHelper.EncryptId(id.Value.ToString()), StatusCodes.Status201Created)
         );
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id}")]
     [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Update })]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UserProfileRequest request)
+    public async Task<IActionResult> UpdateAsync(string id, [FromBody] UserProfileRequest request)
     {
         if (!ModelState.IsValid)
         {
             return StatusCode(StatusCodes.Status400BadRequest, ApiResponse<string>.Failure(StatusCodes.Status400BadRequest, "Invalid request body.", ModelStateHelper.ToErrorResponse(ModelState)));
         }
 
-        var updated = await _profileService.UpdateAsync(id, request, (int)HttpContext.Items["UserId"]);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var updated = await _profileService.UpdateAsync(convertedId, request, (int)HttpContext.Items["UserId"]);
         if (!updated)
         {
             return StatusCode(
@@ -101,15 +111,20 @@ public class UserProfileController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+            ApiResponse<string>.SuccessResponse(id, StatusCodes.Status200OK)
         );
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id}")]
     [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Delete })]
-    public async Task<IActionResult> DeleteAsync(int id)
+    public async Task<IActionResult> DeleteAsync(string id)
     {
-        var deleted = await _profileService.DeleteAsync(id);
+        var decryptedId = EncryptionHelper.DecryptId(id);
+        if (!int.TryParse(decryptedId, out int convertedId))
+        {
+            throw new Exception("Invalid id");
+        }
+        var deleted = await _profileService.DeleteAsync(convertedId);
         if (!deleted)
         {
             return StatusCode(
@@ -120,7 +135,7 @@ public class UserProfileController : ControllerBase
 
         return StatusCode(
             StatusCodes.Status200OK,
-            ApiResponse<int>.SuccessResponse(id, StatusCodes.Status200OK)
+            ApiResponse<string>.SuccessResponse(id, StatusCodes.Status200OK)
         );
     }
 }
