@@ -15,5 +15,6 @@ public class AppDbContext : DbContext
     public DbSet<UserActivityLog> UserActivityLogs { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<ErrorLog> ErrorLogs { get; set; }
 
 }
