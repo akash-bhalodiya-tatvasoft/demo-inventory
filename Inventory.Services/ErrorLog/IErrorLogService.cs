@@ -7,4 +7,8 @@ public interface IErrorLogService
 {
     Task<PaginatedResponse<ErrorLog>> GetAllAsync(ErrorLogFilterRequest request);
     Task<ErrorLog?> GetByIdAsync(int id);
+    Task<int> DeleteAllAsync();
+    Task<int> DeleteByDateRangeAsync(ErrorLogDeleteByDateRequest request);
+
+
 }

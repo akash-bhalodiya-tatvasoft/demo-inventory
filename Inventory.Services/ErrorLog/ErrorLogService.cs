@@ -57,4 +57,30 @@ public class ErrorLogService : IErrorLogService
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
     }
+
+    public async Task<int> DeleteAllAsync()
+    {
+        var logs = await _context.ErrorLogs.ToListAsync();
+        _context.ErrorLogs.RemoveRange(logs);
+        await _context.SaveChangesAsync();
+
+        return logs.Count;
+    }
+
+    public async Task<int> DeleteByDateRangeAsync(ErrorLogDeleteByDateRequest request)
+    {
+        var fromUtc = DateTime.SpecifyKind(request.FromDate.Date, DateTimeKind.Utc);
+        var toUtc = DateTime.SpecifyKind(
+            request.ToDate.Date.AddDays(1),
+            DateTimeKind.Utc);
+
+        var logs = await _context.ErrorLogs
+            .Where(x => x.LogDate >= fromUtc && x.LogDate <= toUtc)
+            .ToListAsync();
+
+        _context.ErrorLogs.RemoveRange(logs);
+        await _context.SaveChangesAsync();
+
+        return logs.Count;
+    }
 }

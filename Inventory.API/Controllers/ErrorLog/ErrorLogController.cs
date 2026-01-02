@@ -59,4 +59,26 @@ public class ErrorLogController : ControllerBase
             ApiResponse<ErrorLog>.SuccessResponse(log, StatusCodes.Status200OK)
         );
     }
+
+    [HttpDelete("delete-all")]
+    public async Task<IActionResult> DeleteAllAsync()
+    {
+        var deletedCount = await _errorLogService.DeleteAllAsync();
+
+        return StatusCode(
+            StatusCodes.Status200OK,
+            ApiResponse<int>.SuccessResponse(deletedCount, StatusCodes.Status200OK)
+        );
+    }
+
+    [HttpDelete("delete-by-date")]
+    public async Task<IActionResult> DeleteByDateRangeAsync([FromBody] ErrorLogDeleteByDateRequest request)
+    {
+        var deletedCount = await _errorLogService.DeleteByDateRangeAsync(request);
+
+        return StatusCode(
+           StatusCodes.Status200OK,
+           ApiResponse<int>.SuccessResponse(deletedCount, StatusCodes.Status200OK)
+       );
+    }
 }
