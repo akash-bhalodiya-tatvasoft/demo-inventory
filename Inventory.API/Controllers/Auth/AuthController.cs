@@ -73,7 +73,21 @@ public class AuthController : ControllerBase
             ActivityModule = (int)ActivityLogModule.User
         });
 
-        return StatusCode(StatusCodes.Status200OK, ApiResponse<string>.SuccessResponse(token, StatusCodes.Status200OK));
+        return StatusCode(StatusCodes.Status200OK, ApiResponse<LoginResponse>.SuccessResponse(token, StatusCodes.Status200OK));
+    }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        if (string.IsNullOrEmpty(request.RefreshToken))
+            return BadRequest(ApiResponse<string>.Failure(400, "Refresh token required"));
+
+        var response = await _authService.RefreshTokenAsync(request.RefreshToken);
+
+        if (response == null)
+            return Unauthorized(ApiResponse<string>.Failure(401, "Invalid or expired refresh token"));
+
+        return Ok(ApiResponse<LoginResponse>.SuccessResponse(response, 200));
     }
 
     [HttpPost("update-status")]

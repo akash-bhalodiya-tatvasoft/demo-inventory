@@ -48,7 +48,7 @@ public class AuthService : IAuthService
         return true;
     }
 
-    public async Task<string?> LoginAsync(LoginRequest request)
+    public async Task<LoginResponse?> LoginAsync(LoginRequest request)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         if (user == null || !user.IsActive)
@@ -58,10 +58,45 @@ public class AuthService : IAuthService
         if (hashedInput != user.PasswordHash)
             return null;
 
+        var refreshToken = GenerateRefreshToken();
+        var accessToken = GenerateJwtToken(user);
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
         user.LastLogin = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        return GenerateJwtToken(user);
+        return new LoginResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        };
+    }
+
+    public async Task<LoginResponse?> RefreshTokenAsync(string refreshToken)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x =>
+            x.RefreshToken == refreshToken &&
+            x.RefreshTokenExpiry > DateTime.UtcNow &&
+            x.IsActive);
+
+        if (user == null)
+            return null;
+
+        var newAccessToken = GenerateJwtToken(user);
+        var newRefreshToken = GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+        await _context.SaveChangesAsync();
+
+        return new LoginResponse
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken
+        };
     }
 
     public async Task<int?> UpdateUserStatusAsync(int userId, int modifiedBy, bool isActive)
@@ -103,5 +138,13 @@ public class AuthService : IAuthService
         using var sha256 = SHA256.Create();
         var hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
         return Convert.ToHexString(hashedPassword).ToLowerInvariant();
+    }
+
+    private string GenerateRefreshToken()
+    {
+        var bytes = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(bytes);
+        return Convert.ToBase64String(bytes);
     }
 }

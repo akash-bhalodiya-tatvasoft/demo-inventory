@@ -15,6 +15,10 @@ public class User : BaseEntity
     /// </summary>
     public int Role { get; set; } = 3;
 
+    public string? RefreshToken { get; set; }
+
+    public DateTime? RefreshTokenExpiry { get; set; }
+
     public bool IsActive { get; set; } = true;
     public string Permissions { get; set; } = JsonSerializer.Serialize(new UserPermissions());
     public DateTime? LastLogin { get; set; }
