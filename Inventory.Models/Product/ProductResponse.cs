@@ -27,4 +27,9 @@ public class ProductResponse : BaseEntity
 
     public string CategoryName { get; set; } = string.Empty;
 
+    [JsonIgnore]
+    public string? ProductImageUrl { get; set; }
+    public string? ProductImageBase64 { get; set; }
+
+
 }

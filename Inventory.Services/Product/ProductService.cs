@@ -36,9 +36,14 @@ public class ProductService : IProductService
         };
 
 
-            var product = await _adoDbContext.ExecuteQueryGetList<ProductResponse>(query, parameters);
-            await _memoryCacheService.SetAsync("Product", product, TimeSpan.FromMinutes(60 * 24 * 90));
-            return product;
+            var products = await _adoDbContext.ExecuteQueryGetList<ProductResponse>(query, parameters);
+            foreach (var product in products)
+            {
+                product!.ProductImageBase64 = await FileHelper.GetBase64ImageAsync(product.ProductImageUrl);
+            }
+
+            await _memoryCacheService.SetAsync("Product", products, TimeSpan.FromMinutes(60 * 24 * 90));
+            return products;
         }
         else
         {
@@ -55,6 +60,7 @@ public class ProductService : IProductService
         };
 
         var product = await _adoDbContext.ExecuteQueryGetObject<ProductResponse>(query, parameters);
+        product.ProductImageBase64 = await FileHelper.GetBase64ImageAsync(product.ProductImageUrl);
         return product;
     }
 
@@ -62,11 +68,20 @@ public class ProductService : IProductService
     {
         string query = @"
             INSERT INTO ""Products"" 
-                (""Name"", ""Description"", ""Price"", ""Quantity"", ""DiscountedPrice"", ""DiscountEndOn"", ""CategoryId"", ""CreatedAt"", ""CreatedBy"")
+                (""Name"", ""Description"", ""Price"", ""Quantity"", ""DiscountedPrice"", ""DiscountEndOn"", ""CategoryId"", ""ProductImage"", ""ProductImageUrl"", ""CreatedAt"", ""CreatedBy"")
             VALUES 
-                (@Name, @Description, @Price, @Quantity, @DiscountedPrice, @DiscountEndOn, @CategoryId, @CreatedAt, @CreatedBy)
+                (@Name, @Description, @Price, @Quantity, @DiscountedPrice, @DiscountEndOn, @CategoryId, @ProductImage, @ProductImageUrl, @CreatedAt, @CreatedBy)
             RETURNING ""Id"";
         ";
+
+        string? imageName = null;
+        string? imageUrl = null;
+        if (product.ProductImage != null)
+        {
+            var result = await FileHelper.SaveFileAsync(product.ProductImage, [".jpg", ".png", ".jpeg"], "products");
+            imageName = result.fileName;
+            imageUrl = result.fileUrl;
+        }
 
         var parameters = new Dictionary<string, object>
         {
@@ -77,6 +92,8 @@ public class ProductService : IProductService
             { "DiscountedPrice", product.DiscountedPrice },
             { "DiscountEndOn", product.DiscountEndOn ?? (object)DBNull.Value },
             { "CategoryId", int.Parse(EncryptionHelper.DecryptId(product.EnvryptedCategoryId)) },
+            { "ProductImage", imageName ?? (object)DBNull.Value },
+            { "ProductImageUrl", imageUrl ?? (object)DBNull.Value },
             { "CreatedAt", DateTime.UtcNow },
             { "CreatedBy", userId ?? (object)DBNull.Value },
         };

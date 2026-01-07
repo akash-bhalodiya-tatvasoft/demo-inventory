@@ -19,4 +19,7 @@ public class Product : BaseEntity
     public int CategoryId { get; set; }
 
     public Category Category { get; set; } = null!;
+
+    public string? ProductImage { get; set; }
+    public string? ProductImageUrl { get; set; }
 }

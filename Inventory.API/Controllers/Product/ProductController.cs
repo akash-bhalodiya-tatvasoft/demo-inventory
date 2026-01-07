@@ -77,7 +77,7 @@ public class ProductController : ControllerBase
 
     [HttpPost]
     [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Create })]
-    public async Task<IActionResult> CreateAsync([FromBody] ProductRequest request)
+    public async Task<IActionResult> CreateAsync([FromForm] ProductRequest request)
     {
         if (!ModelState.IsValid)
         {

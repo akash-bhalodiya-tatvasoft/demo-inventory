@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace Inventory.Models.Product;
 
@@ -24,4 +25,7 @@ public class ProductRequest
 
     [Required(ErrorMessage = "Category ID is required.")]
     public string EnvryptedCategoryId { get; set; }
+
+    public IFormFile? ProductImage { get; set; }
+
 }
