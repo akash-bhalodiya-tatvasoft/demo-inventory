@@ -100,7 +100,7 @@ public class ProductController : ControllerBase
 
     [HttpPut("{id}")]
     [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Update })]
-    public async Task<IActionResult> UpdateAsync(string id, [FromBody] ProductRequest request)
+    public async Task<IActionResult> UpdateAsync(string id, [FromForm] ProductRequest request)
     {
         if (!ModelState.IsValid)
         {

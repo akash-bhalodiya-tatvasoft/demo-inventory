@@ -44,4 +44,21 @@ public static class FileHelper
         var bytes = await File.ReadAllBytesAsync(filePath);
         return Convert.ToBase64String(bytes);
     }
+
+    public static void DeleteFile(string fileUrl)
+    {
+        if (string.IsNullOrWhiteSpace(fileUrl))
+            return;
+
+        var filePath = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "wwwroot",
+            fileUrl.TrimStart('/')
+        );
+
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+        }
+    }
 }

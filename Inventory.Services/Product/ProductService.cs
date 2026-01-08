@@ -114,33 +114,57 @@ public class ProductService : IProductService
             return false;
         }
 
+        string? imageName = null;
+        string? imageUrl = null;
+
+        if (product.ProductImage != null)
+        {
+            if (!string.IsNullOrWhiteSpace(existingProduct.ProductImageUrl))
+            {
+                FileHelper.DeleteFile(existingProduct.ProductImageUrl);
+            }
+
+            var result = await FileHelper.SaveFileAsync(
+                product.ProductImage,
+                [".jpg", ".jpeg", ".png"],
+                "products"
+            );
+
+            imageName = result.fileName;
+            imageUrl = result.fileUrl;
+        }
+
         string query = @"
-            UPDATE ""Products"" SET
-                ""Name"" = @Name,
-                ""Description"" = @Description,
-                ""Price"" = @Price,
-                ""Quantity"" = @Quantity,
-                ""DiscountedPrice"" = @DiscountedPrice,
-                ""DiscountEndOn"" = @DiscountEndOn,
-                ""CategoryId"" = @CategoryId,
-                ""ModifiedAt"" = @ModifiedAt,
-                ""ModifiedBy"" = @ModifiedBy
-            WHERE ""Id"" = @Id RETURNING ""Id"";
-        ";
+        UPDATE ""Products"" SET
+            ""Name"" = @Name,
+            ""Description"" = @Description,
+            ""Price"" = @Price,
+            ""Quantity"" = @Quantity,
+            ""DiscountedPrice"" = @DiscountedPrice,
+            ""DiscountEndOn"" = @DiscountEndOn,
+            ""CategoryId"" = @CategoryId,
+            ""ProductImage"" = COALESCE(@ProductImage, ""ProductImage""),
+            ""ProductImageUrl"" = COALESCE(@ProductImageUrl, ""ProductImageUrl""),
+            ""ModifiedAt"" = @ModifiedAt,
+            ""ModifiedBy"" = @ModifiedBy
+        WHERE ""Id"" = @Id RETURNING ""Id"";
+    ";
 
         var parameters = new Dictionary<string, object>
-        {
-            { "Id", id },
-            { "Name", product.Name },
-            { "Description", product.Description },
-            { "Price", product.Price },
-            { "Quantity", product.Quantity },
-            { "DiscountedPrice", product.DiscountedPrice },
-            { "DiscountEndOn", product.DiscountEndOn ?? (object)DBNull.Value },
-            { "CategoryId", int.Parse(EncryptionHelper.DecryptId(product.EnvryptedCategoryId)) },
-            { "ModifiedAt", DateTime.UtcNow },
-            { "ModifiedBy", userId ?? (object)DBNull.Value },
-        };
+    {
+        { "Id", id },
+        { "Name", product.Name },
+        { "Description", product.Description },
+        { "Price", product.Price },
+        { "Quantity", product.Quantity },
+        { "DiscountedPrice", product.DiscountedPrice },
+        { "DiscountEndOn", product.DiscountEndOn ?? (object)DBNull.Value },
+        { "CategoryId", int.Parse(EncryptionHelper.DecryptId(product.EnvryptedCategoryId)) },
+        { "ProductImage", imageName ?? (object)DBNull.Value },
+        { "ProductImageUrl", imageUrl ?? (object)DBNull.Value },
+        { "ModifiedAt", DateTime.UtcNow },
+        { "ModifiedBy", userId ?? (object)DBNull.Value },
+    };
 
         var productId = await _adoDbContext.ExecuteQuery<int>(query, parameters);
 
@@ -151,6 +175,16 @@ public class ProductService : IProductService
 
     public async Task<bool> DeleteAsync(int id)
     {
+        var existingProduct = await GetByIdAsync(id);
+
+        if (existingProduct == null)
+            return false;
+
+        if (!string.IsNullOrWhiteSpace(existingProduct.ProductImageUrl))
+        {
+            FileHelper.DeleteFile(existingProduct.ProductImageUrl);
+        }
+
         string query = @"DELETE FROM ""Products"" WHERE ""Id"" = @Id RETURNING ""Id""";
         var parameters = new Dictionary<string, object>
         {

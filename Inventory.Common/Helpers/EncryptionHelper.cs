@@ -22,11 +22,13 @@ public static class EncryptionHelper
         byte[] encrypted = aes.CreateEncryptor()
                               .TransformFinalBlock(inputBytes, 0, inputBytes.Length);
 
-        return Convert.ToBase64String(encrypted);
+        return Convert.ToBase64String(encrypted).Replace("+", "-").Replace("/", "_");
     }
 
     public static string DecryptId(string encryptedId)
     {
+        encryptedId = encryptedId.Replace("-", "+").Replace("_", "/");
+
         if (string.IsNullOrEmpty(encryptedId))
             return string.Empty;
 
