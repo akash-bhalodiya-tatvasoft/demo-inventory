@@ -44,6 +44,7 @@ builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IErrorLogService, ErrorLogService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Memory caching service
 builder.Services.AddSingleton<IMemoryCacheService, MemoryCacheService>();

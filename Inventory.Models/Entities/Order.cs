@@ -11,6 +11,8 @@ public class Order : BaseEntity
 
     public decimal TotalAmount { get; set; }
 
+    public bool IsEmailSent { get; set; }
+
     public User User { get; set; } = null!;
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

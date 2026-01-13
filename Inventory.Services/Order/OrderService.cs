@@ -12,10 +12,12 @@ namespace Inventory.Services;
 public class OrderService : IOrderService
 {
     private readonly AppDbContext _context;
+    private readonly IEmailService _emailService;
 
-    public OrderService(AppDbContext context)
+    public OrderService(AppDbContext context, IEmailService emailService)
     {
         _context = context;
+        _emailService = emailService;
     }
 
     public async Task<int?> CreateAsync(OrderRequest orderRequest, int userId)
@@ -73,11 +75,18 @@ public class OrderService : IOrderService
 
             await transaction.CommitAsync();
 
+            var user = await _context.Users.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.Id == userId);
+
+            await _emailService.SendOrderCreatedEmailAsync(user.Email, $"{user.UserProfile.FirstName}", order);
+
             return order.Id;
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync();
+            if (_context.Database.CurrentTransaction != null)
+            {
+                await transaction.RollbackAsync();
+            }
             return null;
         }
     }
