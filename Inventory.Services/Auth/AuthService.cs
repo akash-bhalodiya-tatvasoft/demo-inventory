@@ -114,10 +114,16 @@ public class AuthService : IAuthService
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_config["JWTToken:SecretKey"]);
+
+        var permissions = JsonSerializer.Deserialize<UserPermissions>(user.Permissions);
+
         var identity = new ClaimsIdentity(new Claim[]
                         {
                         new Claim(ClaimTypes.Role, Enum.GetName(typeof(GlobalEnum.UserRole), user.Role)),
-                        new Claim(ClaimTypes.Email, user.Email)
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim("permission.create", permissions!.Create.ToString()),
+                        new Claim("permission.update", permissions.Update.ToString()),
+                        new Claim("permission.delete", permissions.Delete.ToString()),
                         });
 
         var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);

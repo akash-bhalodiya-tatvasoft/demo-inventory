@@ -18,6 +18,9 @@ using Mapster;
 using MapsterMapper;
 using Inventory.API.Mapping;
 using FluentValidation.AspNetCore;
+using Inventory.Api.Authorization;
+using Inventory.Common.Enums;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -130,6 +133,21 @@ builder.Services.AddHttpClient<IPostService, PostService>(option =>
 {
     option.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
 });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CanCreate",
+        policy => policy.Requirements.Add(
+            new PermissionRequirement(GlobalEnum.OperationType.Create)));
+    options.AddPolicy("CanUpdate",
+        policy => policy.Requirements.Add(
+            new PermissionRequirement(GlobalEnum.OperationType.Update)));
+    options.AddPolicy("CanDelete",
+        policy => policy.Requirements.Add(
+            new PermissionRequirement(GlobalEnum.OperationType.Delete)));
+});
+
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
 // Enable caching
 builder.Services.AddMemoryCache();

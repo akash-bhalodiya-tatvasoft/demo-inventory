@@ -12,7 +12,7 @@ namespace Inventory.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = $"{nameof(UserRole.SuperAdmin)},{nameof(UserRole.Admin)}")]
+// [Authorize(Roles = $"{nameof(UserRole.SuperAdmin)},{nameof(UserRole.Admin)}")]
 [ApiVersion("1.0")]
 [ApiVersion("2.0")]
 public class CategoryController : ControllerBase
@@ -64,7 +64,8 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPost]
-    [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Create })]
+    // [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Create })]
+    [Authorize(Policy = "CanCreate")]
     public async Task<IActionResult> CreateAsync([FromBody] CategoryRequest request)
     {
         if (!ModelState.IsValid)
@@ -83,7 +84,8 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Update })]
+    // [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Update })]
+    [Authorize(Policy = "CanUpdate")]
     public async Task<IActionResult> UpdateAsync(string id, [FromBody] CategoryRequest request)
     {
         if (!ModelState.IsValid)
@@ -113,7 +115,8 @@ public class CategoryController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Delete })]
+    // [TypeFilter(typeof(PermissionFilter), Arguments = new object[] { OperationType.Delete })]
+    [Authorize(Policy = "CanDelete")]
     public async Task<IActionResult> DeleteAsync(string id)
     {
         var decryptedId = EncryptionHelper.DecryptId(id);
