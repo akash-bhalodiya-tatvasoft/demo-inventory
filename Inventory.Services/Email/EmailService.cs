@@ -64,6 +64,22 @@ public class EmailService : IEmailService
         await SendMailAsync(toEmail, subject, body);
     }
 
+    public async Task SendOtpEmailAsync(string toEmail, string otp)
+    {
+        var subject = "OTP";
+        var body = $"""
+                    <html>
+                    <body>
+                        <p>OTP is:</p>
+                        <h2>{otp}</h2>
+                        <p>OTP expires after 5 minutes.</p>
+                    </body>
+                    </html>
+                    """;
+
+        await SendMailAsync(toEmail, subject, body);
+    }
+
     private async Task SendMailAsync(
         string toEmail,
         string subject,

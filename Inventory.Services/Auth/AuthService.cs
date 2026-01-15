@@ -8,6 +8,7 @@ using Inventory.Context;
 using Inventory.Models.Auth;
 using Inventory.Models.Entities;
 using Inventory.Services.Auth;
+using Inventory.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -18,11 +19,13 @@ public class AuthService : IAuthService
 {
     private readonly AppDbContext _context;
     private readonly IConfiguration _config;
+    private readonly IEmailService _emailService;
 
-    public AuthService(AppDbContext context, IConfiguration config)
+    public AuthService(AppDbContext context, IConfiguration config, IEmailService emailService)
     {
         _context = context;
         _config = config;
+        _emailService = emailService;
     }
 
     public async Task<bool> RegisterAsync(RegisterRequest request)
@@ -48,23 +51,65 @@ public class AuthService : IAuthService
         return true;
     }
 
-    public async Task<LoginResponse?> LoginAsync(LoginRequest request)
+    public async Task<bool> LoginAsync(LoginRequest request)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-        if (user == null || !user.IsActive)
-            return null;
+        if (user == null || !user.IsActive || user.LockoutUntil > DateTime.UtcNow)
+            return false;
 
         var hashedInput = GenerateEncryptedPassword(request.Password);
         if (hashedInput != user.PasswordHash)
-            return null;
+            return false;
 
-        var refreshToken = GenerateRefreshToken();
+        var otp = GenerateOtp();
+
+        user.OtpCode = otp;
+        user.OtpExpiry = DateTime.UtcNow.AddMinutes(5);
+        user.OtpFailedAttempts = 0;
+
+        await _context.SaveChangesAsync();
+
+        await _emailService.SendOtpEmailAsync(user.Email, otp);
+
+        return true;
+    }
+
+    public async Task<LoginResponse?> VerifyOtpAsync(string email, string otp)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+        if (user == null || user.LockoutUntil > DateTime.UtcNow)
+            return new LoginResponse { accountLocked = true };
+
+        if (user.OtpExpiry < DateTime.UtcNow)
+            return new LoginResponse { expiredOtp = true };
+
+        if (user.OtpCode != otp)
+        {
+            user.OtpFailedAttempts++;
+
+            if (user.OtpFailedAttempts >= 3)
+            {
+                user.LockoutUntil = DateTime.UtcNow.AddMinutes(30);
+                user.OtpFailedAttempts = 0;
+            }
+
+            await _context.SaveChangesAsync();
+            return null;
+        }
+
+        user.OtpCode = null;
+        user.OtpExpiry = null;
+        user.OtpFailedAttempts = 0;
+        user.LockoutUntil = null;
+
         var accessToken = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
-
         user.LastLogin = DateTime.UtcNow;
+
         await _context.SaveChangesAsync();
 
         return new LoginResponse
@@ -152,5 +197,12 @@ public class AuthService : IAuthService
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
         return Convert.ToBase64String(bytes);
+    }
+
+    private string GenerateOtp()
+    {
+        return RandomNumberGenerator
+            .GetInt32(100000, 999999)
+            .ToString();
     }
 }

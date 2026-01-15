@@ -20,6 +20,12 @@ public class User : BaseEntity
     public DateTime? RefreshTokenExpiry { get; set; }
 
     public bool IsActive { get; set; } = true;
+
+    public string? OtpCode { get; set; }
+    public DateTime? OtpExpiry { get; set; }
+    public int OtpFailedAttempts { get; set; }
+    public DateTime? LockoutUntil { get; set; }
+
     public string Permissions { get; set; } = JsonSerializer.Serialize(new UserPermissions());
     public DateTime? LastLogin { get; set; }
 

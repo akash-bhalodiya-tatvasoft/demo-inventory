@@ -48,8 +48,6 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        var userAgent = Request.Headers["User-Agent"].ToString();
 
         if (!ModelState.IsValid)
         {
@@ -58,8 +56,32 @@ public class AuthController : ControllerBase
 
         var token = await _authService.LoginAsync(request);
 
-        if (token == null)
+        if (token == null || token == false)
             return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid email or password."));
+
+        return StatusCode(StatusCodes.Status200OK, ApiResponse<string>.SuccessResponse("OTP send in email.", StatusCodes.Status200OK));
+    }
+
+    [HttpPost("verify-otp")]
+    public async Task<IActionResult> VerifyOtp(VerifyOtpRequest request)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Invalid email or otp."));
+        }
+
+        var token = await _authService.VerifyOtpAsync(request.Email, request.Otp);
+
+        if (token?.accountLocked == true)
+            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Account locked due to multiple attempt using incorrect OTP."));
+
+        if (token?.expiredOtp == true)
+            return StatusCode(StatusCodes.Status401Unauthorized, ApiResponse<string>.Failure(StatusCodes.Status401Unauthorized, "Otp expired, please re-login."));
+
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = Request.Headers["User-Agent"].ToString();
 
         var user = await _userService.GetUserByEmailAsync(request.Email);
 
@@ -73,7 +95,7 @@ public class AuthController : ControllerBase
             ActivityModule = (int)ActivityLogModule.User
         });
 
-        return StatusCode(StatusCodes.Status200OK, ApiResponse<LoginResponse>.SuccessResponse(token, StatusCodes.Status200OK));
+        return Ok(token);
     }
 
     [HttpPost("refresh-token")]
