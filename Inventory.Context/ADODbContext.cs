@@ -5,7 +5,7 @@ using Npgsql;
 
 namespace Inventory.Context;
 
-public class ADODbContext
+public class ADODbContext : IADODbContext
 {
     private NpgsqlConnection _connection;
 

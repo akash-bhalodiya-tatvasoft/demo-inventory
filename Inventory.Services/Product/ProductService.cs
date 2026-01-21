@@ -11,10 +11,10 @@ namespace Inventory.Services;
 
 public class ProductService : IProductService
 {
-    private readonly ADODbContext _adoDbContext;
+    private readonly IADODbContext _adoDbContext;
     private readonly IMemoryCacheService _memoryCacheService;
 
-    public ProductService(ADODbContext adoDbContext, IMemoryCacheService memoryCacheService)
+    public ProductService(IADODbContext adoDbContext, IMemoryCacheService memoryCacheService)
     {
         _adoDbContext = adoDbContext;
         _memoryCacheService = memoryCacheService;
